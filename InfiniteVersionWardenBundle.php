@@ -21,11 +21,13 @@ class InfiniteVersionWardenBundle extends Bundle
         // In emergencies, this can be bypassed from parameters.yml.
 
         if ($this->container->getParameter('kernel.debug') && !$this->container->getParameter('infinite_version_warden.bypass')) {
-            $projectDir = $this->container->getParameter('kernel.project_dir');
+            if ($this->container->hasParameter('kernel.project_dir')) {
+                $lockFilename = $this->container->getParameter('kernel.project_dir').'/composer.lock';
+            } else {
+                $lockFilename = $this->container->getParameter('kernel.root_dir') . '/../composer.lock';
+            }
 
             // Load PHP version constraint from composer.lock
-            $lockFilename = $projectDir . '/composer.lock';
-
             $composerLock = json_decode(file_get_contents($lockFilename));
             $constraint = $composerLock->platform->php;
 
